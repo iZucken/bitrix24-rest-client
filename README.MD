@@ -30,6 +30,13 @@ Then there are bitrix\endpoint\\* classes which wrap the clients to provide addi
 
 #### Documentation bits
 
+##### Update methods
+
+###### Multi-fields
+
+If ID is not specified in a multi-field value, a new value will be created.
+If non-existent ID is specified, the value will be ignored.
+
 ##### List methods
 
 As pretty much all CRUD methods list is almost generic in structure among many entities.

@@ -4,7 +4,9 @@
   "require": {
     "php": "^7.2",
     "guzzlehttp/guzzle": "~6.0",
-    "monolog/monolog": "^2.0"
+    "monolog/monolog": "^2.0",
+    "ext-json": "*",
+    "ext-memcached": "*"
   },
   "autoload": {
     "psr-4": {

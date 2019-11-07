@@ -2,6 +2,11 @@
 
 namespace bitrix\exception;
 
-class BitrixClientException extends \Exception
+/**
+ * Thrown on exceptional condition on client side of an API.
+ *
+ * @package bitrix\exception
+ */
+class BitrixClientException extends BitrixException
 {
 }
