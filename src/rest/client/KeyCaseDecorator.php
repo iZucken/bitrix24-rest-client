@@ -6,7 +6,7 @@ use bitrix\exception\BitrixClientException;
 use bitrix\Utility;
 
 /**
- * Wrap your bitrix connection to automatically convert all keys to upper case
+ * Automatically convert all keys to upper case
  *
  * @package bitrix\rest\client
  */

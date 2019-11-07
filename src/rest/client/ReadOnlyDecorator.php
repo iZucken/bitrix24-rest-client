@@ -7,7 +7,7 @@ namespace bitrix\rest\client;
 use bitrix\exception\BitrixClientException;
 
 /**
- * Wrap your bitrix connection with this to make it read-only
+ * Attempt to make wrapped connection read-only
  *
  * @package bitrix\rest\client
  */

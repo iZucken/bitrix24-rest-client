@@ -7,7 +7,7 @@ use bitrix\exception\BitrixClientException;
 use bitrix\storage\Storage;
 
 /**
- * Wrap to make client-side scope access checks
+ * Makes client-side scope access checks
  *
  * @package bitrix\rest\client
  */
