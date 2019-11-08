@@ -212,13 +212,14 @@ class CRM
 
     /**
      * @param array $schema
-     * @param GenericListFilter $filter
+     * @param array $filter
      * @throws InputValidationException
      * @throws BitrixException
      * @throws TransportException
      */
-    function assertValidFilter(array $schema, GenericListFilter $filter): void
+    function assertValidFilter(array $schema, array $filter): void
     {
+        $filter = GenericListFilter::fromFullMap($filter);
         foreach ($filter->getOrder() as $field => $value) {
             if (!($value === 'ASC' || $value === 'DESC')) {
                 throw new InputValidationException("Filter order values must be either 'ASC' or 'DESC'");
@@ -242,21 +243,21 @@ class CRM
         foreach ($filter->getFilter() as $filterField => $value) {
             $field = $this->parseListFilter($filterField)[1];
             if (empty($schema[$field])) {
-                throw new InputValidationException("In filter 'filter' field '$field' does not exist");
+                throw new InputValidationException("In filter field '$field' does not exist");
             }
             $fieldSchema = $schema[$field];
             if ($fieldSchema['type'] === 'crm_multifield' && !is_string($value)) {
-                throw new InputValidationException("In filter 'filter' multi-fields like '$field' can only be filtered by a string");
+                throw new InputValidationException("In filter multi-fields like '$field' can only be filtered by a string");
             } else {
                 if (is_array($value)) {
                     foreach ($value as $datum) {
                         if (!$this->assertValidType($fieldSchema, $datum, false)) {
-                            throw new InputValidationException("When using array of values in 'filter' field '$field' they all must conform to '{$fieldSchema['type']}' type");
+                            throw new InputValidationException("When using array of values in a filter field '$field' they all must conform to '{$fieldSchema['type']}' type");
                         }
                     }
                 } else {
                     if (!$this->assertValidType($fieldSchema, $value, false)) {
-                        throw new InputValidationException("In filter 'filter' field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                        throw new InputValidationException("In filter field '$field' value does not conform to '{$fieldSchema['type']}' type");
                     }
                 }
             }

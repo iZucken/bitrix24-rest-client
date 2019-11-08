@@ -71,13 +71,13 @@ class GenericListFilter
         ];
     }
 
-    static function fromMap(array $map): GenericListFilter
+    static function fromFullMap(array $map): GenericListFilter
     {
         return new GenericListFilter(
-            $map['FILTER'] ?? [],
-            $map['SELECT'] ?? [],
-            $map['ORDER'] ?? [],
-            $map['START'] ?? $map['start'] ?? 0
+            $map['FILTER'],
+            $map['SELECT'],
+            $map['ORDER'],
+            $map['start']
         );
     }
 }
