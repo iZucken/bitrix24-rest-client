@@ -206,10 +206,11 @@ class CRM
                 if ($fieldSchema['type'] === 'crm_multifield') {
                     // TODO: support for multi-fields
                     throw new InputValidationException("In filter 'FILTER' multi-fields like '$field' are not allowed");
-                }
-                // TODO: array case validation
-                if (!$this->assertValidType($fieldSchema, $value, false)) {
-                    throw new InputValidationException("In filter 'FILTER' field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                } else {
+                    // TODO: array case validation
+                    if (!$this->assertValidType($fieldSchema, $value, false)) {
+                        throw new InputValidationException("In filter 'FILTER' field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                    }
                 }
             }
         }

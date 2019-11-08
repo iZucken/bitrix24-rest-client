@@ -4,6 +4,8 @@
 namespace bitrix;
 
 
+use bitrix\exception\BitrixClientException;
+
 class Utility
 {
     public static function isPlainArray($argument)
@@ -21,13 +23,13 @@ class Utility
         return true;
     }
 
-    function recursiveNullValueUnset($argument)
+    public static function recursiveNullHashMapValueUnset($argument)
     {
-        if (is_array($argument) && !Utility::isPlainArray($argument)) {
+        if (is_array($argument) && !self::isPlainArray($argument)) {
             $clean = [];
             foreach ($argument as $key => $value) {
                 if (!is_null($value)) {
-                    $clean[$key] = $this->recursiveNullValueUnset($value);
+                    $clean[$key] = self::recursiveNullHashMapValueUnset($value);
                 }
             }
             return $clean;
@@ -35,14 +37,35 @@ class Utility
         return $argument;
     }
 
-    function recursiveExplode(array $delimiters, string $source)
+    /**
+     * @param $argument
+     * @return array
+     * @throws BitrixClientException
+     */
+    public static function recursiveUppercaseKey($argument)
+    {
+        if (is_array($argument) && !self::isPlainArray($argument)) {
+            $upperCased = [];
+            foreach ($argument as $key => $value) {
+                $casedKey = strtoupper($key);
+                if (isset($upperCased[$casedKey])) {
+                    throw new BitrixClientException("Map key casing collision for '$key'");
+                }
+                $upperCased[$casedKey] = self::recursiveUppercaseKey($value);
+            }
+            return $upperCased;
+        }
+        return $argument;
+    }
+
+    public static function recursiveExplode(array $delimiters, string $source)
     {
         if (empty($delimiters)) {
             return [$source];
         }
         $chunks = [];
         foreach (explode(array_pop($delimiters), $source) as $item) {
-            $chunks[] = $this->recursiveExplode($delimiters, $item);
+            $chunks[] = self::recursiveExplode($delimiters, $item);
         }
         return array_merge(...$chunks);
     }

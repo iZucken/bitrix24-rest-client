@@ -2,11 +2,11 @@
 
 namespace bitrix\rest\client;
 
-use bitrix\exception\BitrixClientException;
 use bitrix\Utility;
 
 /**
  * Automatically convert all keys to upper case
+ * Actually dangerous to use since SOMETIMES there are keys that should not be converted
  *
  * @package bitrix\rest\client
  */
@@ -27,24 +27,8 @@ class KeyCaseDecorator implements Bitrix24
         return $this->bitrix->info() . " auto-cased";
     }
 
-    public function recursiveUppercaseKey($argument)
-    {
-        if (is_array($argument) && !Utility::isPlainArray($argument)) {
-            $upperCased = [];
-            foreach ($argument as $key => $value) {
-                $casedKey = strtoupper($key);
-                if (isset($upperCased[$casedKey])) {
-                    throw new BitrixClientException("Map key casing collision for '$key'");
-                }
-                $upperCased[$casedKey] = $this->recursiveUppercaseKey($value);
-            }
-            return $upperCased;
-        }
-        return $argument;
-    }
-
     public function call(string $method, array $parameters = [])
     {
-        return $this->bitrix->call($method, $this->recursiveUppercaseKey($parameters));
+        return $this->bitrix->call($method, Utility::recursiveUppercaseKey($parameters));
     }
 }
