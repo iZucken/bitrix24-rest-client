@@ -5,7 +5,9 @@ namespace bitrix\endpoint;
 
 
 use bitrix\exception\BitrixClientException;
+use bitrix\exception\BitrixException;
 use bitrix\exception\InputValidationException;
+use bitrix\exception\TransportException;
 use bitrix\rest\client\Bitrix24;
 use bitrix\storage\Storage;
 
@@ -33,9 +35,14 @@ class CRM
         $this->storage = $storage;
     }
 
-    public $schema = null;
+    public $schema;
 
-    function pullSchema()
+    /**
+     * @return array
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function pullSchema(): array
     {
         $statusEntityTypes = $this->bitrix->call('crm.status.entity.types');
         $statusEntityTypes = array_combine(array_column($statusEntityTypes, "ID"), $statusEntityTypes);
@@ -67,13 +74,18 @@ class CRM
         ];
     }
 
-    function purgeSchema()
+    function purgeSchema(): void
     {
         $this->schema = null;
         $this->storage->set("Schema", null);
     }
 
-    function getSchema()
+    /**
+     * @return array
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function getSchema(): array
     {
         if (empty($this->schema)) {
             $this->schema = $this->storage->get("Schema");
@@ -86,7 +98,15 @@ class CRM
         return $this->schema;
     }
 
-    function assertValidMultifieldValues($values, bool $needsMutation)
+    /**
+     * @param array $values
+     * @param bool  $needsMutation
+     * @return bool
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function assertValidMultifieldValues(array $values, bool $needsMutation): bool
     {
         $schema = $this->getSchema()['crm']['multifield']['fields'];
         foreach ($values as $value) {
@@ -103,21 +123,31 @@ class CRM
         return true;
     }
 
-    function assertValidType($schema, $value, bool $needsMutation)
+    /**
+     * @param array $schema
+     * @param mixed $value
+     * @param bool  $needsMutation
+     * @return bool
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function assertValidType(array $schema, $value, bool $needsMutation): bool
     {
         switch ($schema['type']) {
             case 'int':
             case 'integer':
-            case 'crm_company': // TODO: company id check?
-            case 'crm_contact': // TODO: contact id check?
-            case 'user': // TODO: user id check?
+            case 'crm_company':
+            case 'crm_contact':
+            case 'user':
                 return is_int($value);
             case 'string':
                 return is_string($value);
             case 'char':
                 return $value === 'Y' || $value === 'N'; // TODO: find a way to resolve this dangerous assumption
-            case 'date':
-                return (bool)strtotime($value); // TODO: determine all valid bitrix date formats, some of them are 'Y-m-d' and 'd.m.Y' or choose one
+            case 'date': // TODO: determine all valid bitrix date formats, some of them are 'Y-m-d' and 'd.m.Y'; or choose a single one
+            case 'datetime': // TODO: appears to conform with common SQL timestamp format, validate that
+                return (bool)strtotime($value);
             case 'double':
             case 'float':
                 return is_float($value);
@@ -136,7 +166,16 @@ class CRM
         throw new BitrixClientException("Encountered unknown type '{$schema['type']}' in a schema");
     }
 
-    function assertValidField(array $schema, string $field, $value, bool $needsMutation)
+    /**
+     * @param array  $schema
+     * @param string $field
+     * @param mixed  $value
+     * @param bool   $needsMutation
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function assertValidField(array $schema, string $field, $value, bool $needsMutation): void
     {
         if (empty($schema[$field])) {
             throw new InputValidationException("Field '$field' does not exist");
@@ -156,14 +195,29 @@ class CRM
         }
     }
 
-    function assertValidFields(array $schema, array $fields, bool $needsMutation)
+    /**
+     * @param array $schema
+     * @param array $fields
+     * @param bool  $needsMutation
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function assertValidFields(array $schema, array $fields, bool $needsMutation): void
     {
         foreach ($fields as $field => $value) {
             $this->assertValidField($schema, $field, $value, $needsMutation);
         }
     }
 
-    function assertValidFilter(array $schema, array $filter)
+    /**
+     * @param array $schema
+     * @param array $filter
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function assertValidFilter(array $schema, array $filter): void
     {
         if (isset($filter['ORDER'])) {
             if (!is_array($filter['ORDER'])) {
@@ -200,7 +254,7 @@ class CRM
                 throw new InputValidationException("Filter 'FILTER' parameter must be an array");
             }
             foreach ($filter['FILTER'] as $filterField => $value) {
-                [$filterType, $field] = $this->parseListFilter($filterField);
+                $field = $this->parseListFilter($filterField)[1];
                 if (empty($schema[$field])) {
                     throw new InputValidationException("In filter 'FILTER' field '$field' does not exist");
                 }
@@ -227,7 +281,12 @@ class CRM
         }
     }
 
-    function parseListFilter(string $field)
+    /**
+     * @param string $field
+     * @return array(string filterType, string filterField)
+     * @throws InputValidationException
+     */
+    function parseListFilter(string $field): array
     {
         $matches = [];
         $matched = preg_match("~(|=|!|%|<|>|<=|>=)(\w+)~", $field, $matches);
