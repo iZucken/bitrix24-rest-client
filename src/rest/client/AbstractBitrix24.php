@@ -4,8 +4,8 @@ namespace bitrix\rest\client;
 
 use bitrix\exception\BitrixServerException;
 use bitrix\exception\TransportException;
-use bitrix\rest\client\Bitrix24;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 
 abstract class AbstractBitrix24 implements Bitrix24
@@ -21,10 +21,13 @@ abstract class AbstractBitrix24 implements Bitrix24
 
     public function call(string $method, array $parameters = [])
     {
-        var_export($parameters);
-        $response = $this->getClient()->request('POST', $this->getBaseLink() . "$method.json", [
-            RequestOptions::FORM_PARAMS => $parameters,
-        ]);
+        try {
+            $response = $this->getClient()->request('POST', $this->getBaseLink() . "$method.json", [
+                RequestOptions::FORM_PARAMS => $parameters,
+            ]);
+        } catch (GuzzleException $exception) {
+            throw new TransportException("This exception should not be ever happening: " . $exception->getMessage());
+        }
         try {
             $decoded = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         } catch (\Exception $exception) {
