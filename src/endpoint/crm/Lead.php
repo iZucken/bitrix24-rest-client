@@ -7,7 +7,9 @@ namespace bitrix\endpoint\crm;
 use bitrix\endpoint\CRM;
 
 /**
- * Wrapper for some of the lead-related CRM API methods
+ * Wrapper for CRUD methods of the Lead-related CRM methods
+ *
+ * // TODO: check how status-based 'require' interacts with api
  *
  * @package endpoint
  */

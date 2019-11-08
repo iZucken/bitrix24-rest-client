@@ -41,6 +41,7 @@ If non-existent ID is specified, the value will be ignored.
 
 As pretty much all CRUD methods list is almost generic in structure among many entities.
 Available to the method 'fieldName' are based on particular entity. 
+Generic lists are always paginated by 50 items.
 
 * Not every list has pages or parameters
 * Based on docs, it is possible for particular list to only accept part of list parameters
@@ -65,7 +66,9 @@ Some special options:
 
 ` 'START' => int `
 
-Offset given in a previous list response to continue from. Some endpoints also offer 'navigation' parameter which seemingly does the same???
+Offset given in a previous list response to continue from. Must be a multiple of 50.
+
+Some endpoints also offer 'navigation' parameter which seemingly does the same???
 
 ` 'FILTER' => [ ... [ filterType.fieldName => filterValue ] ] `
 

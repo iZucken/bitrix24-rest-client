@@ -21,6 +21,7 @@ abstract class AbstractBitrix24 implements Bitrix24
 
     public function call(string $method, array $parameters = [])
     {
+        var_export($parameters);
         $response = $this->getClient()->request('POST', $this->getBaseLink() . "$method.json", [
             RequestOptions::FORM_PARAMS => $parameters,
         ]);

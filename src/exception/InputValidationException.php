@@ -7,6 +7,6 @@ namespace bitrix\exception;
  *
  * @package bitrix\exception
  */
-class ClientInputValidationException extends BitrixClientException
+class InputValidationException extends BitrixClientException
 {
 }

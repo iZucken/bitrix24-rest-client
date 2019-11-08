@@ -5,10 +5,15 @@ namespace bitrix\endpoint;
 
 
 use bitrix\exception\BitrixClientException;
-use bitrix\exception\ClientInputValidationException;
+use bitrix\exception\InputValidationException;
 use bitrix\rest\client\Bitrix24;
 use bitrix\storage\Storage;
 
+/**
+ * Provides schema aggregation and assertion for CRM endpoints
+ *
+ * @package bitrix\endpoint
+ */
 class CRM
 {
     /**
@@ -86,7 +91,7 @@ class CRM
             foreach ($value as $field => $data) {
                 if ($field === "ID") {
                     if (!$needsMutation) {
-                        throw new ClientInputValidationException("ID in multi-fields can only be specified on update");
+                        throw new InputValidationException("ID in multi-fields can only be specified on update");
                     }
                     continue;
                 }
@@ -126,26 +131,26 @@ class CRM
             case 'crm_currency':
                 return in_array($value, array_column($this->schema['crm']['currency']['list'], 'CURRENCY'));
         }
-        throw new BitrixClientException("Encountered unknown type {$schema['type']} in a schema");
+        throw new BitrixClientException("Encountered unknown type '{$schema['type']}' in a schema");
     }
 
     function assertValidField(array $schema, string $field, $value, bool $needsMutation)
     {
         if (empty($schema[$field])) {
-            throw new ClientInputValidationException("Field '$field' does not exist");
+            throw new InputValidationException("Field '$field' does not exist");
         }
         $fieldSchema = $schema[$field];
         if ($fieldSchema['isReadOnly']) {
-            throw new ClientInputValidationException("Field '$field' is read-only");
+            throw new InputValidationException("Field '$field' is read-only");
         }
         if ($fieldSchema['isImmutable'] && $needsMutation) {
-            throw new ClientInputValidationException("Field '$field' cannot be changed after being saved");
+            throw new InputValidationException("Field '$field' cannot be changed after being saved");
         }
         if ($fieldSchema['isMultiple'] && !is_array($value)) {
-            throw new ClientInputValidationException("Field '$field' value should be array, " . gettype($value) . " given");
+            throw new InputValidationException("Field '$field' value should be array, " . gettype($value) . " given");
         }
         if (!$this->assertValidType($fieldSchema, $value, $needsMutation)) {
-            throw new ClientInputValidationException("Field '$field' value does not conform to '{$fieldSchema['type']}' type");
+            throw new InputValidationException("Field '$field' value does not conform to '{$fieldSchema['type']}' type");
         }
     }
 
@@ -158,7 +163,59 @@ class CRM
 
     function assertValidFilter(array $schema, array $filter)
     {
-
+        if (isset($filter['ORDER'])) {
+            if (!is_array($filter['ORDER'])) {
+                throw new InputValidationException("Filter 'ORDER' parameter must be an array");
+            }
+            foreach ($filter['ORDER'] as $field => $value) {
+                if (!($value === 'ASC' || $value === 'DESC')) {
+                    throw new InputValidationException("Filter 'ORDER' field values must be either 'ASC' or 'DESC'");
+                }
+                if (empty($schema[$field])) {
+                    throw new InputValidationException("In filter 'ORDER' field '$field' does not exist");
+                }
+                if ($schema[$field]['type'] === 'crm_multifield') {
+                    throw new InputValidationException("In filter 'ORDER' multi-fields like '$field' are not allowed");
+                }
+            }
+        }
+        if (isset($filter['SELECT'])) {
+            if (!is_array($filter['SELECT'])) {
+                throw new InputValidationException("Filter 'SELECT' parameter must be an array");
+            }
+            foreach ($filter['SELECT'] as $valueField) {
+                if (!(
+                    isset($schema[$valueField]) ||
+                    $valueField === '*' || // special mask for all non-multiple standard fields
+                    $valueField === 'UF_*' // special mask for all non-multiple user-fields
+                )) {
+                    throw new InputValidationException("In filter 'SELECT' field '$valueField' does not exist");
+                }
+            }
+        }
+        if (isset($filter['FILTER'])) {
+            if (!is_array($filter['FILTER'])) {
+                throw new InputValidationException("Filter 'FILTER' parameter must be an array");
+            }
+            foreach ($filter['FILTER'] as $filterField => $value) {
+                [$filterType, $field] = $this->parseListFilter($filterField);
+                if (empty($schema[$field])) {
+                    throw new InputValidationException("In filter 'FILTER' field '$field' does not exist");
+                }
+                $fieldSchema = $schema[$field];
+                if ($fieldSchema['type'] === 'crm_multifield') {
+                    // TODO: support for multi-fields
+                    throw new InputValidationException("In filter 'FILTER' multi-fields like '$field' are not allowed");
+                }
+                // TODO: array case validation
+                if (!$this->assertValidType($fieldSchema, $value, false)) {
+                    throw new InputValidationException("In filter 'FILTER' field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                }
+            }
+        }
+        if (isset($filter['START']) && (!is_int($filter['START']) || ($filter['START'] % 50 != 0))) {
+            throw new InputValidationException("Filter 'START' parameter must be an integer multiple of 50");
+        }
     }
 
     function parseListFilter(string $field)
@@ -166,8 +223,8 @@ class CRM
         $matches = [];
         $matched = preg_match("~(|=|!|%|<|>|<=|>=)(\w+)~", $field, $matches);
         if (!$matched) {
-            throw new BitrixClientException("Invalid filter $field");
+            throw new InputValidationException("Invalid filter '$field'");
         }
-        return ['type' => $matches[1], 'field' => $matches[2]];
+        return [$matches[1], $matches[2]];
     }
 }
