@@ -26,7 +26,7 @@ interface Bitrix24
      * @param string $method
      * @param array  $parameters
      *
-     * @return int | bool | string | array | [ 'result' => array, 'total' => int, 'next' => int|null ] - массив с сущностью или список сущностей с указанием на следующую
+     * @return null | int | bool | string | array | [ 'result' => array, 'total' => int, 'next' => int|null ] - массив с сущностью или список сущностей с указанием на следующую
      *
      * @throws TransportException
      * @throws BitrixClientException

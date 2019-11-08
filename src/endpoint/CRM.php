@@ -246,8 +246,10 @@ class CRM
                 throw new InputValidationException("In filter field '$field' does not exist");
             }
             $fieldSchema = $schema[$field];
-            if ($fieldSchema['type'] === 'crm_multifield' && !is_string($value)) {
-                throw new InputValidationException("In filter multi-fields like '$field' can only be filtered by a string");
+            if ($fieldSchema['type'] === 'crm_multifield'){
+                if (!is_string($value)) {
+                    throw new InputValidationException("In filter multi-fields like '$field' can only be filtered by a string");
+                }
             } else {
                 if (is_array($value)) {
                     foreach ($value as $datum) {
