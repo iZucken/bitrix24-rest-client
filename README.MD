@@ -37,18 +37,15 @@ Then there are bitrix\endpoint\\* classes which wrap the clients to provide addi
 If ID is not specified in a multi-field value, a new value will be created.
 If non-existent ID is specified, the value will be ignored.
 
-##### List methods
+##### Generic list methods
 
-As pretty much all CRUD methods list is almost generic in structure among many entities.
-Available to the method 'fieldName' are based on particular entity. 
+Usable in list parameters 'fieldName's depend on particular entity.
+There can be some undocumented derivative fields available for filtering like `HAS_*FIELD*`.
 Generic lists are always paginated by 50 items.
 
-* Not every list has pages or parameters
 * Based on docs, it is possible for particular list to only accept part of list parameters
 * It is possible for fields in list parameters to be ignored arbitrarily
-* Few lists appear to support LIMIT but this is yet uncertain
-* There can be some undocumented derivative fields available for filtering like `HAS_PHONE`, `HAS_*`
-* Particular list method can have it's own required filter fields
+* It is possible for particular list methods to have required filter fields
 
 ###### List method parameters:
 
