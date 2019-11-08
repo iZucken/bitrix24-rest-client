@@ -5,6 +5,11 @@ namespace bitrix\endpoint\crm;
 
 
 use bitrix\endpoint\CRM;
+use bitrix\exception\BitrixClientException;
+use bitrix\exception\BitrixException;
+use bitrix\exception\BitrixServerException;
+use bitrix\exception\InputValidationException;
+use bitrix\exception\TransportException;
 
 /**
  * Wrapper for CRUD methods of the Lead-related CRM methods
@@ -25,29 +30,64 @@ class Lead
         $this->crm = $crm;
     }
 
-    public function add($fields): int
+    /**
+     * @param array $fields
+     * @return int
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    public function add(array $fields): int
     {
         $this->crm->assertValidFields($this->crm->getSchema()['crm']['lead']['fields'], $fields, false);
         return $this->crm->bitrix->call('crm.lead.add', ['FIELDS' => $fields]);
     }
 
-    public function get(int $id)
+    /**
+     * @param int $id
+     * @return array
+     * @throws TransportException
+     * @throws BitrixClientException
+     * @throws BitrixServerException
+     */
+    public function get(int $id): array
     {
         return $this->crm->bitrix->call('crm.lead.get', ['ID' => $id]);
     }
 
-    public function update(int $id, $fields)
+    /**
+     * @param int   $id
+     * @param array $fields
+     * @return bool
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    public function update(int $id, array $fields): bool
     {
         $this->crm->assertValidFields($this->crm->getSchema()['crm']['lead']['fields'], $fields, true);
         return $this->crm->bitrix->call('crm.lead.update', ["ID" => $id, "FIELDS" => $fields]);
     }
 
-    public function delete(int $id)
+    /**
+     * @param int $id
+     * @return bool
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    public function delete(int $id): bool
     {
         return $this->crm->bitrix->call('crm.lead.delete', ["ID" => $id]);
     }
 
-    function list(array $filter)
+    /**
+     * @param array $filter
+     * @return array
+     * @throws InputValidationException
+     * @throws BitrixException
+     * @throws TransportException
+     */
+    function list(array $filter): array
     {
         $this->crm->assertValidFilter($this->crm->getSchema()['crm']['lead']['fields'], $filter);
         return $this->crm->bitrix->call('crm.lead.list', $filter);
