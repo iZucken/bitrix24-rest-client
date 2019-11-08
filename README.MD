@@ -61,7 +61,7 @@ Some special options:
  * `'*'` - all normal non-multiple fields
  * `'UF_*'` - all user fields
 
-` 'START' => int `
+` 'start' => int `
 
 Offset given in a previous list response to continue from. Must be a multiple of 50.
 

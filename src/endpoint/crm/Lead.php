@@ -10,6 +10,7 @@ use bitrix\exception\BitrixException;
 use bitrix\exception\BitrixServerException;
 use bitrix\exception\InputValidationException;
 use bitrix\exception\TransportException;
+use bitrix\endpoint\GenericListFilter;
 
 /**
  * Wrapper for CRUD methods of the Lead-related CRM methods
@@ -81,15 +82,15 @@ class Lead
     }
 
     /**
-     * @param array $filter
+     * @param GenericListFilter $filter
      * @return array
      * @throws InputValidationException
      * @throws BitrixException
      * @throws TransportException
      */
-    function list(array $filter): array
+    function list(GenericListFilter $filter): array
     {
         $this->crm->assertValidFilter($this->crm->getSchema()['crm']['lead']['fields'], $filter);
-        return $this->crm->bitrix->call('crm.lead.list', $filter);
+        return $this->crm->bitrix->call('crm.lead.list', $filter->toMap());
     }
 }

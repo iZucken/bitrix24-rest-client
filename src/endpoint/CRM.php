@@ -212,72 +212,57 @@ class CRM
 
     /**
      * @param array $schema
-     * @param array $filter
+     * @param GenericListFilter $filter
      * @throws InputValidationException
      * @throws BitrixException
      * @throws TransportException
      */
-    function assertValidFilter(array $schema, array $filter): void
+    function assertValidFilter(array $schema, GenericListFilter $filter): void
     {
-        if (isset($filter['ORDER'])) {
-            if (!is_array($filter['ORDER'])) {
-                throw new InputValidationException("Filter 'ORDER' parameter must be an array");
+        foreach ($filter->getOrder() as $field => $value) {
+            if (!($value === 'ASC' || $value === 'DESC')) {
+                throw new InputValidationException("Filter order values must be either 'ASC' or 'DESC'");
             }
-            foreach ($filter['ORDER'] as $field => $value) {
-                if (!($value === 'ASC' || $value === 'DESC')) {
-                    throw new InputValidationException("Filter 'ORDER' field values must be either 'ASC' or 'DESC'");
-                }
-                if (empty($schema[$field])) {
-                    throw new InputValidationException("In filter 'ORDER' field '$field' does not exist");
-                }
-                if ($schema[$field]['type'] === 'crm_multifield') {
-                    throw new InputValidationException("In filter 'ORDER' multi-fields like '$field' are not allowed");
-                }
+            if (empty($schema[$field])) {
+                throw new InputValidationException("In filter order field '$field' does not exist");
+            }
+            if ($schema[$field]['type'] === 'crm_multifield') {
+                throw new InputValidationException("In filter order multi-fields like '$field' are not allowed");
             }
         }
-        if (isset($filter['SELECT'])) {
-            if (!is_array($filter['SELECT'])) {
-                throw new InputValidationException("Filter 'SELECT' parameter must be an array");
-            }
-            foreach ($filter['SELECT'] as $valueField) {
-                if (!(
-                    isset($schema[$valueField]) ||
-                    $valueField === '*' || // special mask for all non-multiple standard fields
-                    $valueField === 'UF_*' // special mask for all non-multiple user-fields
-                )) {
-                    throw new InputValidationException("In filter 'SELECT' field '$valueField' does not exist");
-                }
+        foreach ($filter->getSelect() as $valueField) {
+            if (!(
+                isset($schema[$valueField]) ||
+                $valueField === '*' || // special mask for all non-multiple standard fields
+                $valueField === 'UF_*' // special mask for all non-multiple user-fields
+            )) {
+                throw new InputValidationException("In filter select field '$valueField' does not exist");
             }
         }
-        if (isset($filter['FILTER'])) {
-            if (!is_array($filter['FILTER'])) {
-                throw new InputValidationException("Filter 'FILTER' parameter must be an array");
+        foreach ($filter->getFilter() as $filterField => $value) {
+            $field = $this->parseListFilter($filterField)[1];
+            if (empty($schema[$field])) {
+                throw new InputValidationException("In filter 'filter' field '$field' does not exist");
             }
-            foreach ($filter['FILTER'] as $filterField => $value) {
-                $field = $this->parseListFilter($filterField)[1];
-                if (empty($schema[$field])) {
-                    throw new InputValidationException("In filter 'FILTER' field '$field' does not exist");
-                }
-                $fieldSchema = $schema[$field];
-                if ($fieldSchema['type'] === 'crm_multifield' && !is_string($value)) {
-                    throw new InputValidationException("In filter 'FILTER' multi-fields like '$field' can only be filtered by a string");
+            $fieldSchema = $schema[$field];
+            if ($fieldSchema['type'] === 'crm_multifield' && !is_string($value)) {
+                throw new InputValidationException("In filter 'filter' multi-fields like '$field' can only be filtered by a string");
+            } else {
+                if (is_array($value)) {
+                    foreach ($value as $datum) {
+                        if (!$this->assertValidType($fieldSchema, $datum, false)) {
+                            throw new InputValidationException("When using array of values in 'filter' field '$field' they all must conform to '{$fieldSchema['type']}' type");
+                        }
+                    }
                 } else {
-                    if (is_array($value)) {
-                        foreach ($value as $datum) {
-                            if (!$this->assertValidType($fieldSchema, $datum, false)) {
-                                throw new InputValidationException("When using array of values in 'FILTER' field '$field' they all must conform to '{$fieldSchema['type']}' type");
-                            }
-                        }
-                    } else {
-                        if (!$this->assertValidType($fieldSchema, $value, false)) {
-                            throw new InputValidationException("In filter 'FILTER' field '$field' value does not conform to '{$fieldSchema['type']}' type");
-                        }
+                    if (!$this->assertValidType($fieldSchema, $value, false)) {
+                        throw new InputValidationException("In filter 'filter' field '$field' value does not conform to '{$fieldSchema['type']}' type");
                     }
                 }
             }
         }
-        if (isset($filter['START']) && (!is_int($filter['START']) || ($filter['START'] % 50 != 0))) {
-            throw new InputValidationException("Filter 'START' parameter must be an integer multiple of 50");
+        if ($filter->getStart() % 50 != 0) {
+            throw new InputValidationException("Filter start parameter must be an integer multiple of 50");
         }
     }
 
@@ -289,7 +274,7 @@ class CRM
     function parseListFilter(string $field): array
     {
         $matches = [];
-        $matched = preg_match("~(|=|!|%|<|>|<=|>=)(\w+)~", $field, $matches);
+        $matched = preg_match("~^(|=|!|%|<|>|<=|>=)(\w+)$~", $field, $matches);
         if (!$matched) {
             throw new InputValidationException("Invalid filter '$field'");
         }
