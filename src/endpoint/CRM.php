@@ -12,6 +12,8 @@ use bitrix\storage\Storage;
 /**
  * Provides schema aggregation and assertion for CRM endpoints
  *
+ * TODO: fields size quality validation
+ *
  * @package bitrix\endpoint
  */
 class CRM
@@ -109,13 +111,13 @@ class CRM
             case 'crm_company': // TODO: company id check?
             case 'crm_contact': // TODO: contact id check?
             case 'user': // TODO: user id check?
-                return is_int($value); // TODO: resolve dangerous assumption
+                return is_int($value);
             case 'string':
                 return is_string($value);
             case 'char':
-                return $value === 'Y' || $value === 'N'; // TODO: resolve dangerous assumption
+                return $value === 'Y' || $value === 'N'; // TODO: find a way to resolve this dangerous assumption
             case 'date':
-                return (bool)strtotime($value); // TODO: determine all valid bitrix date formats, some of them are Y-m-d and d.m.Y
+                return (bool)strtotime($value); // TODO: determine all valid bitrix date formats, some of them are 'Y-m-d' and 'd.m.Y' or choose one
             case 'double':
             case 'float':
                 return is_float($value);
@@ -203,13 +205,19 @@ class CRM
                     throw new InputValidationException("In filter 'FILTER' field '$field' does not exist");
                 }
                 $fieldSchema = $schema[$field];
-                if ($fieldSchema['type'] === 'crm_multifield') {
-                    // TODO: support for multi-fields
-                    throw new InputValidationException("In filter 'FILTER' multi-fields like '$field' are not allowed");
+                if ($fieldSchema['type'] === 'crm_multifield' && !is_string($value)) {
+                    throw new InputValidationException("In filter 'FILTER' multi-fields like '$field' can only be filtered by a string");
                 } else {
-                    // TODO: array case validation
-                    if (!$this->assertValidType($fieldSchema, $value, false)) {
-                        throw new InputValidationException("In filter 'FILTER' field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                    if (is_array($value)) {
+                        foreach ($value as $datum) {
+                            if (!$this->assertValidType($fieldSchema, $datum, false)) {
+                                throw new InputValidationException("When using array of values in 'FILTER' field '$field' they all must conform to '{$fieldSchema['type']}' type");
+                            }
+                        }
+                    } else {
+                        if (!$this->assertValidType($fieldSchema, $value, false)) {
+                            throw new InputValidationException("In filter 'FILTER' field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                        }
                     }
                 }
             }
