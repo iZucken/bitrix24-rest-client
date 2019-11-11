@@ -6,9 +6,7 @@ namespace bitrix\endpoint;
 /**
  * Simple container for generic list method filters
  *
- * TODO: move some of the validation into this class?
- *
- * @package bitrxi\endpoint
+ * @package bitrix\endpoint
  */
 class GenericListFilter
 {
@@ -35,6 +33,7 @@ class GenericListFilter
         array $order = [],
         int $start = 0
     ) {
+        Schema::assertValidFilterStart($start);
         $this->filter = $filter;
         $this->select = $select;
         $this->order = $order;
@@ -61,7 +60,31 @@ class GenericListFilter
         return $this->start;
     }
 
-    function toMap(): array
+    function filter(array $filter): self
+    {
+        $this->filter = $filter;
+        return $this;
+    }
+
+    function select(array $select): self
+    {
+        $this->select = $select;
+        return $this;
+    }
+
+    function order(array $order): self
+    {
+        $this->order = $order;
+        return $this;
+    }
+
+    function start(int $from): self
+    {
+        Schema::assertValidFilterStart($from);
+        return $this;
+    }
+
+    function toFullMap(): array
     {
         return [
             'ORDER'  => $this->order,

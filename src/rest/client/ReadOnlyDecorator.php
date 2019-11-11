@@ -11,16 +11,16 @@ use bitrix\exception\BitrixClientException;
  *
  * @package bitrix\rest\client
  */
-class ReadOnlyDecorator implements Bitrix24
+class ReadOnlyDecorator implements BitrixClient
 {
     /**
-     * @var Bitrix24
+     * @var BitrixClient
      */
     public $client;
 
     const RESTRICTED_REGEX = '~\b(add|(re)?set|(((un)?bind|modify|update|delete|force).*?))\b~';
 
-    function __construct(Bitrix24 $client)
+    function __construct(BitrixClient $client)
     {
         $this->client = $client;
     }

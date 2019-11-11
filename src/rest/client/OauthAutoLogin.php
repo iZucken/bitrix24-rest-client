@@ -2,17 +2,19 @@
 
 namespace bitrix\rest\client;
 
-use bitrix\exception\BitrixClientException;
+use bitrix\exception\BitrixServerException;
 use bitrix\exception\TransportException;
+use bitrix\exception\UndefinedBitrixServerException;
 use bitrix\rest\OauthFullCredentials;
 use bitrix\storage\Storage;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Psr\Log\LoggerInterface;
 
-class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
+class OauthAutoLogin implements BitrixClient
 {
     const ACCESS_TOKEN_DURATION = '+55 minutes';
     const REFRESH_TOKEN_DURATION = "+25 days";
@@ -58,10 +60,14 @@ class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
 
     public function info(): string
     {
-        return "REST Application " . parent::info();
+        return "REST Application " . $this->baseLink . "/rest/";
     }
 
-    public function newRefreshToken()
+    /**
+     * @return array
+     * @throws TransportException
+     */
+    public function newRefreshToken() : array
     {
         $this->logger->info("Logging in");
         $response = $this->client->get($this->baseLink . "/oauth/authorize/", [
@@ -107,7 +113,12 @@ class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
         return $data;
     }
 
-    public function newAccessToken($refreshToken)
+    /**
+     * @param string $refreshToken
+     * @return array
+     * @throws TransportException
+     */
+    public function newAccessToken(string $refreshToken) : array
     {
         $this->logger->info("Getting new access token");
         $response = $this->client->get("https://oauth.bitrix.info/oauth/token/", [
@@ -132,7 +143,10 @@ class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
         return $data;
     }
 
-    public function storeTokens( $data )
+    /**
+     * @param array $data
+     */
+    public function storeTokens(array $data) : void
     {
         $this->accessToken = $data['access_token'];
         $this->accessUntil = strtotime(self::ACCESS_TOKEN_DURATION);
@@ -144,7 +158,10 @@ class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
         $this->storage->set('RefreshTokenUntil', $this->refreshUntil);
     }
 
-    public function acquireTokens()
+    /**
+     * @throws TransportException
+     */
+    public function acquireTokens() : void
     {
         $this->refreshToken = $this->storage->get('RefreshToken');
         $this->refreshUntil = $this->storage->get('RefreshTokenUntil');
@@ -160,7 +177,11 @@ class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
         }
     }
 
-    public function acquireAccessToken()
+    /**
+     * @return string
+     * @throws TransportException
+     */
+    public function acquireAccessToken() : string
     {
         if (empty($this->accessToken) || empty($this->accessUntil) || (time() >= $this->accessUntil)) {
             $this->acquireTokens();
@@ -172,10 +193,38 @@ class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
     {
         $this->logger->info("Call to $method");
         $parameters['auth'] = $this->acquireAccessToken();
-        return parent::call($method, $parameters);
+        try {
+            $response = $this->client->request('POST', "$this->baseLink/rest/$method.json", [
+                RequestOptions::FORM_PARAMS => $parameters,
+            ]);
+        } catch (GuzzleException $exception) {
+            throw new TransportException("This exception should not be ever happening: " . $exception->getMessage());
+        }
+        try {
+            $decoded = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        } catch (\Exception $exception) {
+            throw new TransportException("Failed to decode result: " . $exception->getMessage());
+        }
+        if (!empty($decoded['error'])||!empty($decoded['error_description'])) {
+            throw new BitrixServerException("{$decoded['error']}: {$decoded['error_description']}");
+        }
+        if ($response->getStatusCode() !== 200) {
+            throw new UndefinedBitrixServerException($response->getStatusCode() . ": " . $response->getReasonPhrase());
+        }
+        $result = $decoded['result'];
+        if (isset($decoded['total'])) {
+            $result = [
+                'result' => $decoded['result'],
+                'total'  => $decoded['total'],
+            ];
+            if (isset($decoded['next'])) {
+                $result['next'] = $decoded['next'];
+            }
+        }
+        return $result;
     }
 
-    public function purge()
+    public function purge() : void
     {
         $this->accessToken = null;
         $this->accessUntil = null;
@@ -185,15 +234,5 @@ class OauthAutoLogin extends AbstractBitrix24 implements Bitrix24
         $this->storage->set('AccessTokenUntil', null);
         $this->storage->set('RefreshToken', null);
         $this->storage->set('RefreshTokenUntil', null);
-    }
-
-    protected function getBaseLink(): string
-    {
-        return $this->baseLink . "/rest/";
-    }
-
-    protected function getClient(): ClientInterface
-    {
-        return $this->client;
     }
 }

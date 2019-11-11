@@ -69,4 +69,12 @@ class Utility
         }
         return array_merge(...$chunks);
     }
+
+    public static function unsetColumn(array &$source, string $column)
+    {
+        foreach ($source as $key => $value) {
+            unset($source[$key][$column]);
+        }
+        return $source;
+    }
 }

@@ -4,6 +4,11 @@ namespace bitrix\storage;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Simple Memcached storage
+ *
+ * @package bitrix\storage
+ */
 class Memcached implements Storage
 {
     /**

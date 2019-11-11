@@ -11,10 +11,10 @@ use bitrix\storage\Storage;
  *
  * @package bitrix\rest\client
  */
-class ScopeCheckDecorator implements Bitrix24
+class ScopeCheckDecorator implements BitrixClient
 {
     /**
-     * @var Bitrix24
+     * @var BitrixClient
      */
     public $bitrix;
     public $pulled = false;
@@ -28,7 +28,7 @@ class ScopeCheckDecorator implements Bitrix24
     const SCOPE_ALL = "ScopeAll";
     const SCOPE_PERMITTED = "ScopePermitted";
 
-    function __construct(Bitrix24 $bitrix, Storage $storage)
+    function __construct(BitrixClient $bitrix, Storage $storage)
     {
         $this->bitrix = $bitrix;
         $this->storage = $storage;

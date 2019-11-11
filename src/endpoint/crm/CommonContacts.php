@@ -4,7 +4,7 @@
 namespace endpoint\crm;
 
 
-use bitrix\endpoint\CRM;
+use bitrix\endpoint\Schema;
 use bitrix\exception\BitrixException;
 use bitrix\exception\InputValidationException;
 use bitrix\exception\TransportException;
@@ -25,13 +25,13 @@ class CommonContacts
     const ENTITY_COMPANY = 'COMPANY';
 
     /**
-     * @var CRM
+     * @var Schema
      */
-    private $crm;
+    private $schema;
 
-    function __construct(CRM $crm)
+    function __construct(Schema $schema)
     {
-        $this->crm = $crm;
+        $this->schema = $schema;
     }
 
     /**
@@ -53,7 +53,7 @@ class CommonContacts
                 $entityType === self::ENTITY_CONTACT ||
                 $entityType === self::ENTITY_COMPANY
             )) {
-            throw new InputValidationException("Invalid contact type");
+            throw new InputValidationException("Invalid entity type");
         }
         if (count($items) > 20) {
             throw new InputValidationException("Too many items provided for common entities search");
@@ -63,7 +63,7 @@ class CommonContacts
         }
         foreach ($items as $item) {
             if (!is_string($item)) {
-                throw new InputValidationException("Items must contain string only");
+                throw new InputValidationException("Items must only be strings");
             }
         }
         $data = [
@@ -73,7 +73,7 @@ class CommonContacts
         if (isset($entityType)) {
             $data['ENTITY_TYPE'] = $entityType;
         }
-        $result = $this->crm->bitrix->call("crm.duplicate.findbycomm", $data);
+        $result = $this->schema->client->call("crm.duplicate.findbycomm", $data);
         return [
             self::ENTITY_LEAD    => $result[self::ENTITY_LEAD] ?? [],
             self::ENTITY_CONTACT => $result[self::ENTITY_CONTACT] ?? [],
