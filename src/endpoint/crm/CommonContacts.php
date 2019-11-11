@@ -1,7 +1,7 @@
 <?php
 
 
-namespace endpoint\crm;
+namespace bitrix\endpoint\crm;
 
 
 use bitrix\endpoint\Schema;
