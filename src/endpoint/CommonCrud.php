@@ -30,6 +30,11 @@ abstract class CommonCrud
         $this->schema = $schema;
     }
 
+    /**
+     * @return array
+     * @throws BitrixException
+     * @throws TransportException
+     */
     abstract function getScopeSettings(): array;
 
     abstract function getScopeName(): string;
@@ -51,13 +56,13 @@ abstract class CommonCrud
 
     /**
      * @param int $id
-     * @return array
+     * @return array | null
      * @throws NotFoundException
      * @throws BitrixClientException
      * @throws BitrixServerException
      * @throws TransportException
      */
-    public function get(int $id): ?array
+    public function get(int $id)
     {
         try {
             return $this->schema->client->call($this->getScopePath() . '.get', ['ID' => $id]);

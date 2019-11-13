@@ -35,14 +35,6 @@ abstract class SystemCrud
     abstract function getScopePath(): string;
 
     /**
-     * @throws BitrixClientException
-     */
-    public function assertScope(): void
-    {
-        $this->schema->assertInScope($this->getScopeName());
-    }
-
-    /**
      * @param array $fields
      * @return int
      * @throws InputValidationException
@@ -57,13 +49,13 @@ abstract class SystemCrud
 
     /**
      * @param int $id
-     * @return array
+     * @return array|null
      * @throws NotFoundException
      * @throws BitrixClientException
      * @throws BitrixServerException
      * @throws TransportException
      */
-    public function get(int $id): ?array
+    public function get(int $id)
     {
         try {
             return $this->schema->client->call($this->getScopePath() . '.get', ['ID' => $id]);

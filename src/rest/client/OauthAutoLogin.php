@@ -2,26 +2,23 @@
 
 namespace bitrix\rest\client;
 
-use bitrix\exception\BitrixServerException;
 use bitrix\exception\TransportException;
-use bitrix\exception\UndefinedBitrixServerException;
 use bitrix\rest\OauthFullCredentials;
 use bitrix\storage\Storage;
+use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Cookie\CookieJar;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Psr\Log\LoggerInterface;
 
-class OauthAutoLogin implements BitrixClient
+class OauthAutoLogin extends AbstractConnection implements BitrixClient
 {
     const ACCESS_TOKEN_DURATION = '+55 minutes';
     const REFRESH_TOKEN_DURATION = "+25 days";
     /**
      * @var Client
      */
-    private $client = null;
+    protected $client = null;
     private $baseLink = null;
     /**
      * @var OauthFullCredentials
@@ -107,7 +104,7 @@ class OauthAutoLogin implements BitrixClient
         }
         try {
             $data = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             throw new TransportException("Failed to decode first token grant");
         }
         return $data;
@@ -134,7 +131,7 @@ class OauthAutoLogin implements BitrixClient
         }
         try {
             $data = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             throw new TransportException("Failed to decode refresh response $refreshToken");
         }
         if (!empty($data['error'])) {
@@ -146,7 +143,7 @@ class OauthAutoLogin implements BitrixClient
     /**
      * @param array $data
      */
-    public function storeTokens(array $data) : void
+    public function storeTokens(array $data)
     {
         $this->accessToken = $data['access_token'];
         $this->accessUntil = strtotime(self::ACCESS_TOKEN_DURATION);
@@ -161,7 +158,7 @@ class OauthAutoLogin implements BitrixClient
     /**
      * @throws TransportException
      */
-    public function acquireTokens() : void
+    public function acquireTokens()
     {
         $this->refreshToken = $this->storage->get('RefreshToken');
         $this->refreshUntil = $this->storage->get('RefreshTokenUntil');
@@ -193,38 +190,11 @@ class OauthAutoLogin implements BitrixClient
     {
         $this->logger->info("Call to $method");
         $parameters['auth'] = $this->acquireAccessToken();
-        try {
-            $response = $this->client->request('POST', "$this->baseLink/rest/$method.json", [
-                RequestOptions::FORM_PARAMS => $parameters,
-            ]);
-        } catch (GuzzleException $exception) {
-            throw new TransportException("This exception should not be ever happening: " . $exception->getMessage());
-        }
-        try {
-            $decoded = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        } catch (\Exception $exception) {
-            throw new TransportException("Failed to decode result: " . $exception->getMessage());
-        }
-        if (!empty($decoded['error'])||!empty($decoded['error_description'])) {
-            throw new BitrixServerException("{$decoded['error']}: {$decoded['error_description']}");
-        }
-        if ($response->getStatusCode() !== 200) {
-            throw new UndefinedBitrixServerException($response->getStatusCode() . ": " . $response->getReasonPhrase());
-        }
-        $result = $decoded['result'];
-        if (isset($decoded['total'])) {
-            $result = [
-                'result' => $decoded['result'],
-                'total'  => $decoded['total'],
-            ];
-            if (isset($decoded['next'])) {
-                $result['next'] = $decoded['next'];
-            }
-        }
-        return $result;
+        $uri = "$this->baseLink/rest/$method.json";
+        return parent::call($uri, $parameters);
     }
 
-    public function purge() : void
+    public function purge()
     {
         $this->accessToken = null;
         $this->accessUntil = null;

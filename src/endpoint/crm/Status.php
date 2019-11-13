@@ -5,6 +5,8 @@ namespace bitrix\endpoint\crm;
 
 
 use bitrix\endpoint\SystemCrud;
+use bitrix\exception\BitrixException;
+use bitrix\exception\TransportException;
 
 /**
  * Wrapper for CRM statuses CRUD methods
@@ -25,8 +27,8 @@ class Status extends SystemCrud
 
     /**
      * @return array
-     * @throws \bitrix\exception\BitrixException
-     * @throws \bitrix\exception\TransportException
+     * @throws BitrixException
+     * @throws TransportException
      */
     function getScopeSettings(): array
     {

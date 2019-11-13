@@ -4,6 +4,9 @@
 namespace bitrix\rest\client;
 
 use bitrix\exception\BitrixClientException;
+use bitrix\exception\BitrixServerException;
+use bitrix\exception\TransportException;
+use bitrix\exception\UndefinedBitrixServerException;
 use bitrix\storage\Storage;
 
 /**
@@ -57,6 +60,12 @@ class ScopeCheckDecorator implements BitrixClient
         return $this->bitrix->call($method, $parameters);
     }
 
+    /**
+     * @throws BitrixClientException
+     * @throws BitrixServerException
+     * @throws TransportException
+     * @throws UndefinedBitrixServerException
+     */
     public function pullScope()
     {
         if (!$this->pulled) {

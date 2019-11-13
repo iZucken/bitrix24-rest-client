@@ -57,17 +57,25 @@ class SystemListFilter
         ];
     }
 
-    static function fromFullMap(array $map): GenericListFilter
+    /**
+     * @param array $map
+     * @return SystemListFilter
+     */
+    static function fromFullMap(array $map): SystemListFilter
     {
-        return new GenericListFilter(
+        return new SystemListFilter(
             $map['FILTER'],
             $map['ORDER']
         );
     }
 
-    static function fromWeakMap(array $map): GenericListFilter
+    /**
+     * @param array $map
+     * @return SystemListFilter
+     */
+    static function fromWeakMap(array $map): SystemListFilter
     {
-        return new GenericListFilter(
+        return new SystemListFilter(
             $map['FILTER'] ?? $map['filter'] ?? [],
             $map['ORDER'] ?? $map['order'] ?? []
         );

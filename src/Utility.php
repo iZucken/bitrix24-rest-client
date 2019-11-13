@@ -4,10 +4,14 @@
 namespace bitrix;
 
 
-use bitrix\exception\BitrixClientException;
+use ErrorException;
 
 class Utility
 {
+    /**
+     * @param $argument
+     * @return bool
+     */
     public static function isPlainArray($argument)
     {
         if (!is_array($argument)) {
@@ -23,6 +27,10 @@ class Utility
         return true;
     }
 
+    /**
+     * @param $argument
+     * @return array
+     */
     public static function recursiveNullHashMapValueUnset($argument)
     {
         if (is_array($argument) && !self::isPlainArray($argument)) {
@@ -40,7 +48,7 @@ class Utility
     /**
      * @param $argument
      * @return array
-     * @throws BitrixClientException
+     * @throws ErrorException
      */
     public static function recursiveUppercaseKey($argument)
     {
@@ -49,7 +57,7 @@ class Utility
             foreach ($argument as $key => $value) {
                 $casedKey = strtoupper($key);
                 if (isset($upperCased[$casedKey])) {
-                    throw new BitrixClientException("Map key casing collision for '$key'");
+                    throw new ErrorException("Map key casing collision for '$key'");
                 }
                 $upperCased[$casedKey] = self::recursiveUppercaseKey($value);
             }
@@ -58,6 +66,11 @@ class Utility
         return $argument;
     }
 
+    /**
+     * @param array  $delimiters
+     * @param string $source
+     * @return array
+     */
     public static function recursiveExplode(array $delimiters, string $source)
     {
         if (empty($delimiters)) {
@@ -70,6 +83,11 @@ class Utility
         return array_merge(...$chunks);
     }
 
+    /**
+     * @param array  $source
+     * @param string $column
+     * @return array
+     */
     public static function unsetColumn(array &$source, string $column)
     {
         foreach ($source as $key => $value) {

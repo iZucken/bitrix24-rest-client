@@ -3,6 +3,8 @@
 
 namespace bitrix\endpoint;
 
+use bitrix\exception\InputValidationException;
+
 /**
  * Simple container for generic list method filters
  *
@@ -34,7 +36,7 @@ class GenericListFilter
      * @param array $select
      * @param array $order
      * @param int   $start
-     * @throws \bitrix\exception\InputValidationException
+     * @throws InputValidationException
      */
     public function __construct(
         array $filter = [],
@@ -90,7 +92,7 @@ class GenericListFilter
     /**
      * @param int $from
      * @return $this
-     * @throws \bitrix\exception\InputValidationException
+     * @throws InputValidationException
      */
     function start(int $from): self
     {
@@ -108,6 +110,11 @@ class GenericListFilter
         ];
     }
 
+    /**
+     * @param array $map
+     * @return GenericListFilter
+     * @throws InputValidationException
+     */
     static function fromFullMap(array $map): GenericListFilter
     {
         return new GenericListFilter(
@@ -118,6 +125,11 @@ class GenericListFilter
         );
     }
 
+    /**
+     * @param array $map
+     * @return GenericListFilter
+     * @throws InputValidationException
+     */
     static function fromWeakMap(array $map): GenericListFilter
     {
         return new GenericListFilter(

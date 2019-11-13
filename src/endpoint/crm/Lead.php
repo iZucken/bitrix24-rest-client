@@ -5,6 +5,8 @@ namespace bitrix\endpoint\crm;
 
 
 use bitrix\endpoint\CommonCrud;
+use bitrix\exception\BitrixException;
+use bitrix\exception\TransportException;
 
 /**
  * Wrapper for Lead-related CRM CRUD methods
@@ -27,8 +29,8 @@ class Lead extends CommonCrud
 
     /**
      * @return array
-     * @throws \bitrix\exception\BitrixException
-     * @throws \bitrix\exception\TransportException
+     * @throws BitrixException
+     * @throws TransportException
      */
     function getScopeSettings(): array
     {

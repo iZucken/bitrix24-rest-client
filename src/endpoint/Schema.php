@@ -208,10 +208,10 @@ class Schema
                         'isMultiple'  => false,
                     ],
                     'UF_DEPARTMENT' => [
-                        'type'        => 'unchecked',
+                        'type'        => 'int',
                         'isReadOnly'  => false,
                         'isImmutable' => false,
-                        'isMultiple'  => false,
+                        'isMultiple'  => true,
                     ],
                 ]),
             ];
@@ -261,7 +261,7 @@ class Schema
      * @throws BitrixException
      * @throws TransportException
      */
-    function assertInScope(string $scope): void
+    function assertInScope(string $scope)
     {
         $scopes = $this->getSchema()['scope'];
         if (!isset($scopes[$scope])) {
@@ -270,7 +270,7 @@ class Schema
         }
     }
 
-    function purgeSchema(): void
+    function purgeSchema()
     {
         $this->schema = null;
         $this->storage->set("Schema", null);
@@ -373,7 +373,7 @@ class Schema
      * @throws BitrixException
      * @throws TransportException
      */
-    function assertValidField(array $schema, string $field, $value, bool $needsMutation): void
+    function assertValidField(array $schema, string $field, $value, bool $needsMutation)
     {
         if (empty($schema[$field])) {
             throw new InputValidationException("Field '$field' does not exist");
@@ -410,7 +410,7 @@ class Schema
      * @throws BitrixException
      * @throws TransportException
      */
-    function assertValidFields(array $schema, array $fields, bool $needsMutation): void
+    function assertValidFields(array $schema, array $fields, bool $needsMutation)
     {
         foreach ($fields as $field => $value) {
             $this->assertValidField($schema, $field, $value, $needsMutation);
@@ -478,7 +478,7 @@ class Schema
      * @throws InputValidationException
      * @throws TransportException
      */
-    function assertValidFilter(array $schema, GenericListFilter $filter, bool $withConditionals = true): void
+    function assertValidFilter(array $schema, GenericListFilter $filter, bool $withConditionals = true)
     {
         $this->assertValidFilterOrder($schema, $filter->getOrder());
         foreach ($filter->getSelect() as $valueField) {
@@ -508,7 +508,7 @@ class Schema
      * @throws InputValidationException
      * @throws TransportException
      */
-    function assertValidSystemFilter(array $schema, SystemListFilter $filter): void
+    function assertValidSystemFilter(array $schema, SystemListFilter $filter)
     {
         $this->assertValidFilterOrder($schema, $filter->getOrder());
         foreach ($filter->getFilter() as $field => $value) {

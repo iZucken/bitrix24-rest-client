@@ -5,6 +5,7 @@ namespace bitrix\rest\client;
 use bitrix\exception\BitrixClientException;
 use bitrix\exception\BitrixServerException;
 use bitrix\exception\TransportException;
+use bitrix\exception\UndefinedBitrixServerException;
 
 /**
  * Main calling interface for Bitrix24 REST API
@@ -21,16 +22,17 @@ interface BitrixClient
     public function info(): string;
 
     /**
-     * Вызов метода api с любыми параметрами
+     * Call an api method with arbitrary parameters
      *
      * @param string $method
      * @param array  $parameters
      *
-     * @return null | int | bool | string | array | [ 'result' => array, 'total' => int, 'next' => int|null ] - массив с сущностью или список сущностей с указанием на следующую
+     * @return null | int | bool | string | array | [ 'result' => array, 'total' => int, ['next' => int|null] ]
      *
      * @throws TransportException
      * @throws BitrixClientException
      * @throws BitrixServerException
+     * @throws UndefinedBitrixServerException
      */
     public function call(string $method, array $parameters = []);
 }
