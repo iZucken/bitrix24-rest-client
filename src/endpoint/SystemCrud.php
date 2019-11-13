@@ -14,11 +14,9 @@ use bitrix\exception\TransportException;
 /**
  * Wrapper for CRUD methods of the Lead-related CRM methods
  *
- * // TODO: check how status-based 'require' interacts with api
- *
  * @package endpoint
  */
-abstract class CommonCrud
+abstract class SystemCrud
 {
     /**
      * @var Schema
@@ -35,6 +33,14 @@ abstract class CommonCrud
     abstract function getScopeName(): string;
 
     abstract function getScopePath(): string;
+
+    /**
+     * @throws BitrixClientException
+     */
+    public function assertScope(): void
+    {
+        $this->schema->assertInScope($this->getScopeName());
+    }
 
     /**
      * @param array $fields
@@ -115,18 +121,16 @@ abstract class CommonCrud
     }
 
     /**
-     * @param GenericListFilter $filter
+     * @param SystemListFilter $filter
      * @return array
      * @throws InputValidationException
      * @throws BitrixException
      * @throws TransportException
-     * @throws NotFoundException - when out of list bounds
      */
-    public function list(GenericListFilter $filter): array
+    public function list(SystemListFilter $filter): array
     {
-        $this->schema->assertValidFilter($this->getScopeSettings()['fields'], $filter);
+        $this->schema->assertValidSystemFilter($this->getScopeSettings()['fields'], $filter);
         $list = $this->schema->client->call($this->getScopePath() . '.list', $filter->toFullMap());
-        $this->schema->listResponseInbound($filter, $list);
         return $list;
     }
 }

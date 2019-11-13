@@ -13,20 +13,29 @@ class GenericListFilter
     /**
      * @var array
      */
-    private $filter;
+    protected $filter;
     /**
      * @var array
      */
-    private $select;
+    protected $select;
     /**
      * @var array
      */
-    private $order;
+    protected $order;
     /**
      * @var int
      */
-    private $start;
+    protected $start;
 
+    /**
+     * GenericListFilter constructor.
+     *
+     * @param array $filter
+     * @param array $select
+     * @param array $order
+     * @param int   $start
+     * @throws \bitrix\exception\InputValidationException
+     */
     public function __construct(
         array $filter = [],
         array $select = [],
@@ -78,6 +87,11 @@ class GenericListFilter
         return $this;
     }
 
+    /**
+     * @param int $from
+     * @return $this
+     * @throws \bitrix\exception\InputValidationException
+     */
     function start(int $from): self
     {
         Schema::assertValidFilterStart($from);
@@ -101,6 +115,16 @@ class GenericListFilter
             $map['SELECT'],
             $map['ORDER'],
             $map['start']
+        );
+    }
+
+    static function fromWeakMap(array $map): GenericListFilter
+    {
+        return new GenericListFilter(
+            $map['FILTER'] ?? $map['filter'] ?? [],
+            $map['SELECT'] ?? $map['select'] ?? [],
+            $map['ORDER'] ?? $map['order'] ?? [],
+            $map['START'] ?? $map['start'] ?? 0
         );
     }
 }

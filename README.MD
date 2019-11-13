@@ -12,16 +12,25 @@ Existing implementations include web hook client and oauth self-authorizing clie
 
 These are generic wrappers, so you still need to know all of the methods and their parameters from the original documentation at this point.
 
-Then there are bitrix\endpoint\\* classes which wrap the clients to provide additional convenience.
+Then there are bitrix\\endpoint\\* classes which wrap the clients to provide additional convenience.
 
 ###### Supported endpoints
 
-* Lead CRUD
+* CRM Lead CRUD
+* CRM Status system CRUD
+* Common contacts search
+* Atavistic User CRUD
+* Atavistic Department CRUD
 
 #### Known caveats
 
 * Documented methods crm.\*.details.\* are not accessible through web hooks or rest application with full rights.
 * In some cases API converts an array value in unexpected place to TRUE.
+* Some field types, like multiple-choice integer field, may be equal to `false` when nothing is chosen, but this library won't allow you to provide boolean value.
+Such values also cannot be unset by just providing an empty array, false, null, or any combination of them. 
+* Sometimes list responses do not conform to what is described below, this library aims to correct that but it is probable that not every case is covered
+* Even if it is not specified, fields having regex rule are considered 'required' implicitly
+* USERFIELD REGEX RULES ARE NOT CHECKED FOR VALIDITY, INVALID REGEXES ALWAYS PASS
 
 #### Hints
 
@@ -32,7 +41,7 @@ Then there are bitrix\endpoint\\* classes which wrap the clients to provide addi
 
 ##### Update methods
 
-###### Multi-fields
+###### Multi-fields ( crm_multifield )
 
 If ID is not specified in a multi-field value, a new value will be created.
 If non-existent ID is specified, the value will be ignored.
@@ -48,6 +57,8 @@ Generic lists are always paginated by 50 items.
 * It is possible for particular list methods to have required filter fields
 
 ###### List method parameters:
+
+These parameters are wrapped inside GenericListFilter class
 
 ` 'ORDER' => [ ... [ fieldName => 'ASC' | 'DESC' ] ] `
 
@@ -92,4 +103,5 @@ Generally consists of fields:
 `'total'` - total amount of possible filtered results
 
 `'next'` - optional field for paged lists, to be used in 'START' filter parameter
+
 

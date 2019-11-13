@@ -31,7 +31,7 @@ abstract class UserDepartmentLegacyCrud extends CommonCrud
         try {
             return $this->schema->client->call($this->getScopePath() . '.update', $fields);
         } catch (BitrixServerException $exception) {
-            $this->convertNotFoundException($exception);
+            throw $this->convertNotFoundException($exception);
         }
     }
 

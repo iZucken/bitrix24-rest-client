@@ -4,16 +4,14 @@
 namespace bitrix\endpoint\crm;
 
 
-use bitrix\endpoint\CommonCrud;
+use bitrix\endpoint\SystemCrud;
 
 /**
- * Wrapper for Lead-related CRM CRUD methods
- *
- * // TODO: check how status-based 'require' interacts with api
+ * Wrapper for CRM statuses CRUD methods
  *
  * @package endpoint
  */
-class Lead extends CommonCrud
+class Status extends SystemCrud
 {
     function getScopeName(): string
     {
@@ -22,7 +20,7 @@ class Lead extends CommonCrud
 
     function getScopePath(): string
     {
-        return 'crm.lead';
+        return 'crm.status';
     }
 
     /**
@@ -32,6 +30,6 @@ class Lead extends CommonCrud
      */
     function getScopeSettings(): array
     {
-        return $this->schema->getSchema()['crm']['lead'];
+        return $this->schema->getSchema()['crm']['status'];
     }
 }

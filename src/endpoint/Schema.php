@@ -71,6 +71,7 @@ class Schema
                     'list' => $this->client->call('crm.currency.list')['result'],
                 ],
                 'status'     => [
+                    'fields' => $this->client->call('crm.status.fields'),
                     'list'   => $statusList,
                     'entity' => [
                         'map' => $statusEntityTypes,
@@ -78,24 +79,68 @@ class Schema
                 ],
             ];
         }
+        // TODO: determine mechanisms for core entities mutation control?
         if (isset($schema['scope']['user'])) {
+            $fields = [];
+            foreach ([
+                         'GENDER',
+                         'PROFESSION',
+                         'WWW',
+                         'BIRTHDAY',
+                         'PHOTO',
+                         'ICQ',
+                         'PHONE',
+                         'FAX',
+                         'MOBILE',
+                         'PAGER',
+                         'STREET',
+                         'CITY',
+                         'STATE',
+                         'ZIP',
+                         'COUNTRY',
+                     ] as $field) {
+                $fields['PERSONAL_' . $field] = [
+                    'type'        => 'string',
+                    'isReadOnly'  => true,
+                    'isImmutable' => true,
+                    'isMultiple'  => false,
+                ];
+            }
+            foreach ([ // user fields pre-made by system
+                         'INTERESTS',
+                         'SKILLS',
+                         'WEB_SITES',
+                         'XING',
+                         'LINKEDIN',
+                         'FACEBOOK',
+                         'TWITTER',
+                         'SKYPE',
+                         'DISTRICT',
+                         'PHONE_INNER',
+                     ] as $field) {
+                $fields['UF_' . $field] = [
+                    'type'        => 'string',
+                    'isReadOnly'  => true,
+                    'isImmutable' => true,
+                    'isMultiple'  => false,
+                ];
+            }
             $schema['user'] = [
-//                'fields' => $this->client->call('user.fields'),
-                'fields' => [
-                    'ID'          => [
+                'fields' => array_merge($fields, [
+                    'ID'            => [
                         'type'        => 'int',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
                     // special fields
-                    'NAME_SEARCH' => [
+                    'NAME_SEARCH'   => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'IS_ONLINE'   => [
+                    'IS_ONLINE'     => [
                         'type'        => 'char',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
@@ -107,43 +152,43 @@ class Schema
                     extranet - пользователь экстранета,
                     email - почтовый пользователь
                      */
-                    'USER_TYPE'   => [
+                    'USER_TYPE'     => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'ACTIVE'      => [
+                    'ACTIVE'        => [
                         'type'        => 'char',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'NAME'        => [
+                    'NAME'          => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'LAST_NAME'   => [
+                    'LAST_NAME'     => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'SECOND_NAME' => [
+                    'SECOND_NAME'   => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'EMAIL' => [
+                    'EMAIL'         => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'WORK_COMPANY' => [
+                    'WORK_COMPANY'  => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
@@ -155,46 +200,23 @@ class Schema
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    'WORK_PHONE' => [
+                    'WORK_PHONE'    => [
                         'type'        => 'string',
                         'isReadOnly'  => true,
                         'isImmutable' => true,
                         'isMultiple'  => false,
                     ],
-                    // TODO: describe the rest of the fields
-//                    <PERSONAL_GENDER>Пол</PERSONAL_GENDER>
-//                    <PERSONAL_PROFESSION>Профессия</PERSONAL_PROFESSION>
-//                    <PERSONAL_WWW>Домашняя страничка</PERSONAL_WWW>
-//                    <PERSONAL_BIRTHDAY>Дата рождения</PERSONAL_BIRTHDAY>
-//                    <PERSONAL_PHOTO>Фотография</PERSONAL_PHOTO>
-//                    <PERSONAL_ICQ>ICQ</PERSONAL_ICQ>
-//                    <PERSONAL_PHONE>Личный телефон</PERSONAL_PHONE>
-//                    <PERSONAL_FAX>Факс</PERSONAL_FAX>
-//                    <PERSONAL_MOBILE>Личный мобильный</PERSONAL_MOBILE>
-//                    <PERSONAL_PAGER>Пейджер</PERSONAL_PAGER>
-//                    <PERSONAL_STREET>Улица проживания</PERSONAL_STREET>
-//                    <PERSONAL_CITY>Город проживания</PERSONAL_CITY>
-//                    <PERSONAL_STATE>Область / край</PERSONAL_STATE>
-//                    <PERSONAL_ZIP>Почтовый индекс</PERSONAL_ZIP>
-//                    <PERSONAL_COUNTRY>Страна</PERSONAL_COUNTRY>
-//                    <UF_DEPARTMENT>Подразделения</UF_DEPARTMENT>
-//                    <UF_INTERESTS>Интересы</UF_INTERESTS>
-//                    <UF_SKILLS>Навыки</UF_SKILLS>
-//                    <UF_WEB_SITES>Другие сайты</UF_WEB_SITES>
-//                    <UF_XING>Xing</UF_XING>
-//                    <UF_LINKEDIN>LinkedIn</UF_LINKEDIN>
-//                    <UF_FACEBOOK>Facebook</UF_FACEBOOK>
-//                    <UF_TWITTER>Twitter</UF_TWITTER>
-//                    <UF_SKYPE>Skype</UF_SKYPE>
-//                    <UF_DISTRICT>Район</UF_DISTRICT>
-//                    <UF_PHONE_INNER>Внутренний телефон</UF_PHONE_INNER>
-                ],
+                    'UF_DEPARTMENT' => [
+                        'type'        => 'unchecked',
+                        'isReadOnly'  => false,
+                        'isImmutable' => false,
+                        'isMultiple'  => false,
+                    ],
+                ]),
             ];
         }
         if (isset($schema['scope']['department'])) {
             $schema['department'] = [
-//                'department' => $this->client->call('department.fields'),
-                // TODO: determine mechanisms for core entities mutation control
                 'fields' => [
                     'ID'      => [
                         'type'        => 'int',
@@ -232,6 +254,12 @@ class Schema
         return $schema;
     }
 
+    /**
+     * @param string $scope
+     * @throws BitrixClientException
+     * @throws BitrixException
+     * @throws TransportException
+     */
     function assertInScope(string $scope): void
     {
         $scopes = $this->getSchema()['scope'];
@@ -266,26 +294,24 @@ class Schema
     }
 
     /**
-     * @param array $values
+     * @param array $value
      * @param bool  $needsMutation
      * @return bool
      * @throws InputValidationException
      * @throws BitrixException
      * @throws TransportException
      */
-    function assertValidMultifieldValues(array $values, bool $needsMutation): bool
+    function assertValidMultifieldValue(array $value, bool $needsMutation): bool
     {
         $schema = $this->getSchema()['crm']['multifield']['fields'];
-        foreach ($values as $value) {
-            foreach ($value as $field => $data) {
-                if ($field === "ID") {
-                    if (!$needsMutation) {
-                        throw new InputValidationException("ID in multi-fields can only be specified on update");
-                    }
-                    continue;
+        foreach ($value as $field => $data) {
+            if ($field === "ID") {
+                if (!$needsMutation) {
+                    throw new InputValidationException("ID in multi-fields can only be specified on update");
                 }
-                $this->assertValidField($schema, $field, $data, $needsMutation);
+                continue;
             }
+            $this->assertValidField($schema, $field, $data, $needsMutation);
         }
         return true;
     }
@@ -313,7 +339,7 @@ class Schema
             case 'bool':
                 return $value === true || $value === false;
             case 'char':
-                return $value === 'Y' || $value === 'N'; // TODO: find a way to resolve this dangerous assumption
+                return $value === 'Y' || $value === 'N'; // TODO: find a way to resolve this dangerous assumption, there are other types of char fields
             case 'date': // TODO: determine all valid bitrix date formats, some of them are 'Y-m-d' and 'd.m.Y'; or choose a single one
             case 'datetime': // TODO: appears to conform with common SQL timestamp format, validate that
                 return (bool)strtotime($value);
@@ -324,13 +350,15 @@ class Schema
                 $possibleValues = array_values(array_column($schema['items'], "ID"));
                 return in_array($value, $possibleValues);
             case 'crm_multifield':
-                return $this->assertValidMultifieldValues($value, $needsMutation);
+                return $this->assertValidMultifieldValue($value, $needsMutation);
             case 'crm_status':
                 return in_array($value,
                     array_column($this->schema['crm']['status']['entity']['map'][$schema['statusType']]['items'],
                         "STATUS_ID"));
             case 'crm_currency':
                 return in_array($value, array_column($this->schema['crm']['currency']['list'], 'CURRENCY'));
+            case 'unchecked':
+                return true;
         }
         throw new BitrixClientException("Encountered unknown type '{$schema['type']}' in a schema");
     }
@@ -356,8 +384,16 @@ class Schema
         if ($fieldSchema['isImmutable'] && $needsMutation) {
             throw new InputValidationException("Field '$field' cannot be changed after being saved");
         }
-        if ($fieldSchema['isMultiple'] && !is_array($value)) {
-            throw new InputValidationException("Field '$field' value should be array, " . gettype($value) . " given");
+        if ($fieldSchema['isMultiple']) {
+            if (!is_array($value)) {
+                throw new InputValidationException("Field '$field' value should be array, " . gettype($value) . " given");
+            } else {
+                foreach ($value as $item) {
+                    if (!$this->assertValidType($fieldSchema, $item, $needsMutation)) {
+                        throw new InputValidationException("Field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                    }
+                }
+            }
         }
         if (!$this->assertValidType($fieldSchema, $value, $needsMutation)) {
             throw new InputValidationException("Field '$field' value does not conform to '{$fieldSchema['type']}' type");
@@ -380,6 +416,59 @@ class Schema
     }
 
     /**
+     * @param array $schema
+     * @param array $order
+     * @throws InputValidationException
+     */
+    function assertValidFilterOrder(array $schema, array $order)
+    {
+        foreach ($order as $field => $value) {
+            if (!($value === 'ASC' || $value === 'DESC')) {
+                throw new InputValidationException("Filter order values must be either 'ASC' or 'DESC'");
+            }
+            if (empty($schema[$field])) {
+                throw new InputValidationException("In filter order field '$field' does not exist");
+            }
+            if ($schema[$field]['isMultiple'] || $schema[$field]['type'] === 'crm_multifield') {
+                throw new InputValidationException("In filter order multi-fields like '$field' are not allowed");
+            }
+        }
+    }
+
+    /**
+     * @param array  $schema
+     * @param string $field
+     * @param mixed $value
+     * @throws BitrixException
+     * @throws InputValidationException
+     * @throws TransportException
+     */
+    function assertValidFilterFieldValue(array $schema, string $field, $value)
+    {
+        if (empty($schema[$field])) {
+            throw new InputValidationException("In filter field '$field' does not exist");
+        }
+        $fieldSchema = $schema[$field];
+        if ($fieldSchema['type'] === 'crm_multifield') {
+            if (!is_string($value)) {
+                throw new InputValidationException("In filter multi-fields like '$field' can only be filtered by a string");
+            }
+        } else {
+            if (is_array($value)) {
+                foreach ($value as $datum) {
+                    if (!$this->assertValidType($fieldSchema, $datum, false)) {
+                        throw new InputValidationException("When using array of values in a filter field '$field' they all must conform to '{$fieldSchema['type']}' type");
+                    }
+                }
+            } else {
+                if (!$this->assertValidType($fieldSchema, $value, false)) {
+                    throw new InputValidationException("In filter field '$field' value does not conform to '{$fieldSchema['type']}' type");
+                }
+            }
+        }
+    }
+
+    /**
      * @param array             $schema
      * @param GenericListFilter $filter
      * @param bool              $withConditionals
@@ -389,17 +478,7 @@ class Schema
      */
     function assertValidFilter(array $schema, GenericListFilter $filter, bool $withConditionals = true): void
     {
-        foreach ($filter->getOrder() as $field => $value) {
-            if (!($value === 'ASC' || $value === 'DESC')) {
-                throw new InputValidationException("Filter order values must be either 'ASC' or 'DESC'");
-            }
-            if (empty($schema[$field])) {
-                throw new InputValidationException("In filter order field '$field' does not exist");
-            }
-            if ($schema[$field]['type'] === 'crm_multifield') {
-                throw new InputValidationException("In filter order multi-fields like '$field' are not allowed");
-            }
-        }
+        $this->assertValidFilterOrder($schema, $filter->getOrder());
         foreach ($filter->getSelect() as $valueField) {
             if (!(
                 isset($schema[$valueField]) ||
@@ -415,29 +494,24 @@ class Schema
             } else {
                 $field = $filterField;
             }
-            if (empty($schema[$field])) {
-                throw new InputValidationException("In filter field '$field' does not exist");
-            }
-            $fieldSchema = $schema[$field];
-            if ($fieldSchema['type'] === 'crm_multifield') {
-                if (!is_string($value)) {
-                    throw new InputValidationException("In filter multi-fields like '$field' can only be filtered by a string");
-                }
-            } else {
-                if (is_array($value)) {
-                    foreach ($value as $datum) {
-                        if (!$this->assertValidType($fieldSchema, $datum, false)) {
-                            throw new InputValidationException("When using array of values in a filter field '$field' they all must conform to '{$fieldSchema['type']}' type");
-                        }
-                    }
-                } else {
-                    if (!$this->assertValidType($fieldSchema, $value, false)) {
-                        throw new InputValidationException("In filter field '$field' value does not conform to '{$fieldSchema['type']}' type");
-                    }
-                }
-            }
+            $this->assertValidFilterFieldValue($schema,$field,$value);
         }
         self::assertValidFilterStart($filter->getStart());
+    }
+
+    /**
+     * @param array            $schema
+     * @param SystemListFilter $filter
+     * @throws BitrixException
+     * @throws InputValidationException
+     * @throws TransportException
+     */
+    function assertValidSystemFilter(array $schema, SystemListFilter $filter): void
+    {
+        $this->assertValidFilterOrder($schema, $filter->getOrder());
+        foreach ($filter->getFilter() as $field => $value) {
+            $this->assertValidFilterFieldValue($schema,$field,$value);
+        }
     }
 
     /**
@@ -455,6 +529,10 @@ class Schema
         return [$matches[1], $matches[2]];
     }
 
+    /**
+     * @param int $start
+     * @throws InputValidationException
+     */
     static function assertValidFilterStart(int $start)
     {
         if ($start < 0 || $start % 50 != 0) {
@@ -462,6 +540,11 @@ class Schema
         }
     }
 
+    /**
+     * @param GenericListFilter $filter
+     * @param array             $listResponse
+     * @throws NotFoundException
+     */
     function listResponseInbound(GenericListFilter $filter, array $listResponse)
     {
         if ($filter->getStart() > $listResponse['total']) {
