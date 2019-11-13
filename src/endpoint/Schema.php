@@ -16,6 +16,7 @@ use bitrix\storage\Storage;
  * Provides schema aggregation and assertion for endpoints
  *
  * TODO: fields size quality validation?
+ * TODO: convert schematic fields to their corresponding types to ease end-user surprise load
  *
  * @package bitrix\endpoint
  */
@@ -394,9 +395,10 @@ class Schema
                     }
                 }
             }
-        }
-        if (!$this->assertValidType($fieldSchema, $value, $needsMutation)) {
-            throw new InputValidationException("Field '$field' value does not conform to '{$fieldSchema['type']}' type");
+        } else {
+            if (!$this->assertValidType($fieldSchema, $value, $needsMutation)) {
+                throw new InputValidationException("Field '$field' value does not conform to '{$fieldSchema['type']}' type");
+            }
         }
     }
 
