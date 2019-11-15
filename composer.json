@@ -2,7 +2,7 @@
   "name": "izucken/bitrix24-rest-client",
   "description": "Client package for Bitrix24 REST API with added validation and other features",
   "require": {
-    "php": "^7.1",
+    "php": "^7.0",
     "guzzlehttp/guzzle": "~6.0",
     "monolog/monolog": "^2.0",
     "ext-json": "*",
