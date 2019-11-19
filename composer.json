@@ -4,14 +4,20 @@
   "require": {
     "php": "^7.0",
     "guzzlehttp/guzzle": "~6.0",
-    "monolog/monolog": "^2.0",
     "ext-json": "*",
-    "ext-memcached": "*"
+    "psr/log": "^1.1"
   },
   "autoload": {
     "psr-4": {
       "bitrix\\": "src/"
     }
   },
-  "license": "MIT"
+  "suggest": {
+    "monolog/monolog": "Allows more advanced logging of the application flow",
+    "ext-memcached": "You know it"
+  },
+  "license": "MIT",
+  "require-dev": {
+    "monolog/monolog": "^2.0"
+  }
 }
