@@ -11,7 +11,7 @@ use bitrix\exception\TransportException;
 use bitrix\Utility;
 
 /**
- * Provides ability to look for entities sharing common contacts
+ * Provides ability to look for some types of CRM entities that share common contacts
  *
  * @package endpoint\crm
  */

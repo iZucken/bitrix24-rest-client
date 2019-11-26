@@ -9,7 +9,7 @@ use bitrix\exception\BitrixException;
 use bitrix\exception\TransportException;
 
 /**
- * Wrapper for CRM statuses CRUD methods
+ * Wraps related CRM CRUD methods
  *
  * @package endpoint
  */

@@ -4,10 +4,21 @@
 namespace bitrix\endpoint;
 
 
-use bitrix\exception\BitrixClientException;
+use bitrix\exception\BitrixException;
+use bitrix\exception\TransportException;
 
+/**
+ * Wraps related General CRUD methods
+ *
+ * @package endpoint
+ */
 class Department extends UserDepartmentLegacyCrud
 {
+    /**
+     * @return array
+     * @throws BitrixException
+     * @throws TransportException
+     */
     function getScopeSettings(): array
     {
         return $this->schema->getSchema()['department'];
@@ -21,10 +32,5 @@ class Department extends UserDepartmentLegacyCrud
     function getScopePath(): string
     {
         return "department";
-    }
-
-    function delete(int $id): bool
-    {
-        throw new BitrixClientException("User deletion is not supported"); // TODO: it is actually supported, just determine control flow
     }
 }

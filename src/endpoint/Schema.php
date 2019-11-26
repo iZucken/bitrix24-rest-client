@@ -62,6 +62,15 @@ class Schema
                 'lead'       => [
                     'fields' => $this->client->call('crm.lead.fields'),
                 ],
+                'contact'    => [
+                    'fields' => $this->client->call('crm.contact.fields'),
+                ],
+                'deal'       => [
+                    'fields' => $this->client->call('crm.deal.fields'),
+                ],
+                'company'    => [
+                    'fields' => $this->client->call('crm.company.fields'),
+                ],
                 'enum'       => [
                     'fields' => $this->client->call('crm.enum.fields'),
                 ],
@@ -340,7 +349,7 @@ class Schema
             case 'bool':
                 return $value === true || $value === false;
             case 'char':
-                return $value === 'Y' || $value === 'N'; // TODO: find a way to resolve this dangerous assumption, there are other types of char fields
+                return $value === 'Y' || $value === 'N'; // TODO: find a GOOD way to resolve this dangerous assumption, there are other types of char fields
             case 'date': // TODO: determine all valid bitrix date formats, some of them are 'Y-m-d' and 'd.m.Y'; or choose a single one
             case 'datetime': // TODO: appears to conform with common SQL timestamp format, validate that
                 return (bool)strtotime($value);
@@ -440,7 +449,7 @@ class Schema
     /**
      * @param array  $schema
      * @param string $field
-     * @param mixed $value
+     * @param mixed  $value
      * @throws BitrixException
      * @throws InputValidationException
      * @throws TransportException
@@ -496,7 +505,7 @@ class Schema
             } else {
                 $field = $filterField;
             }
-            $this->assertValidFilterFieldValue($schema,$field,$value);
+            $this->assertValidFilterFieldValue($schema, $field, $value);
         }
         self::assertValidFilterStart($filter->getStart());
     }
@@ -512,7 +521,7 @@ class Schema
     {
         $this->assertValidFilterOrder($schema, $filter->getOrder());
         foreach ($filter->getFilter() as $field => $value) {
-            $this->assertValidFilterFieldValue($schema,$field,$value);
+            $this->assertValidFilterFieldValue($schema, $field, $value);
         }
     }
 
@@ -547,7 +556,7 @@ class Schema
      * @param array             $listResponse
      * @throws NotFoundException
      */
-    function listResponseInbound(GenericListFilter $filter, array $listResponse)
+    function assertListResponseInbound(GenericListFilter $filter, array $listResponse)
     {
         if ($filter->getStart() > $listResponse['total']) {
             throw new NotFoundException("Filter reached out of list bounds");
@@ -557,6 +566,5 @@ class Schema
                 throw new NotFoundException("Filter reached out of list bounds");
             }
         }
-        // TODO: more checks??
     }
 }
