@@ -21,6 +21,21 @@ Then there are bitrix\\endpoint\\* classes which wrap the clients to provide add
 * Common contacts search
 * Atavistic User CRUD
 * Atavistic Department CRUD
+#### Usage
+```
+$bitrixClient = new \bitrix\rest\client\OauthAutoLogin(
+    $config['bitrix']['uri'],
+    new \bitrix\rest\OauthFullCredentials(
+        $config['bitrix']['id'],
+        $config['bitrix']['secret'],
+        $config['bitrix']['user'],
+        $config['bitrix']['pass']
+    ),
+    new \bitrix\storage\File(__DIR__.'/bitrix.json'),
+    new \Psr\Log\NullLogger()
+);
+$this->bitrixClient->call('app.info');
+```
 
 #### Known caveats
 
