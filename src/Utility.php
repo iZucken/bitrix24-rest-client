@@ -95,4 +95,26 @@ class Utility
         }
         return $source;
     }
+
+    /**
+     * Возвращает либо единственный элемент в массиве, либо null
+     * @param array $items
+     * @return mixed|null
+     */
+    static function disambiguate(array $items)
+    {
+        if (count($items) !== 1) {
+            return null;
+        }
+        return array_pop($items);
+    }
+
+    /**
+     * @param $value
+     * @return bool
+     */
+    static function yesNoBoolean($value)
+    {
+        return $value === 'Y' || $value === true;
+    }
 }

@@ -13,7 +13,7 @@ use bitrix\exception\TransportException;
  *
  * @package endpoint
  */
-class Lead extends CrmCrud
+class Company extends CrmCrud
 {
     function getScopeName(): string
     {
@@ -22,7 +22,7 @@ class Lead extends CrmCrud
 
     function getScopePath(): string
     {
-        return 'crm.lead';
+        return 'crm.company';
     }
 
     /**
@@ -32,6 +32,6 @@ class Lead extends CrmCrud
      */
     function getScopeSettings(): array
     {
-        return $this->schema->getSchema()['crm']['lead'];
+        return $this->schema->getSchema()['crm']['company'];
     }
 }

@@ -12,9 +12,7 @@ use bitrix\exception\InputValidationException;
 use bitrix\exception\TransportException;
 
 /**
- * Wrapper for CRUD methods of the Lead-related CRM methods
- *
- * // TODO: check how status-based 'require' interacts with api
+ * Wrapper for common CRUD methods
  *
  * @package endpoint
  */
@@ -32,7 +30,8 @@ abstract class CommonCrud
 
     /**
      * @return array
-     * @throws BitrixException
+     * @throws BitrixClientException
+     * @throws BitrixServerException
      * @throws TransportException
      */
     abstract function getScopeSettings(): array;
@@ -117,21 +116,5 @@ abstract class CommonCrud
             return new NotFoundException("Entity not found");
         }
         return $exception;
-    }
-
-    /**
-     * @param GenericListFilter $filter
-     * @return array
-     * @throws InputValidationException
-     * @throws BitrixException
-     * @throws TransportException
-     * @throws NotFoundException - when out of list bounds
-     */
-    public function list(GenericListFilter $filter): array
-    {
-        $this->schema->assertValidFilter($this->getScopeSettings()['fields'], $filter);
-        $list = $this->schema->client->call($this->getScopePath() . '.list', $filter->toFullMap());
-        $this->schema->listResponseInbound($filter, $list);
-        return $list;
     }
 }

@@ -5,11 +5,19 @@ namespace bitrix\endpoint;
 
 
 use bitrix\exception\BitrixClientException;
+use bitrix\exception\BitrixException;
 use bitrix\exception\BitrixServerException;
+use bitrix\exception\InputValidationException;
 use bitrix\exception\NotFoundException;
+use bitrix\exception\TransportException;
 use bitrix\exception\UndefinedBitrixServerException;
 use bitrix\Utility;
 
+/**
+ * Wrapper for legacy user and group related CRUD methods
+ *
+ * @package bitrix\endpoint
+ */
 abstract class UserDepartmentLegacyCrud extends CommonCrud
 {
     function get(int $id): array
@@ -35,6 +43,17 @@ abstract class UserDepartmentLegacyCrud extends CommonCrud
         }
     }
 
+    /**
+     * @param GenericListFilter $filter
+     * @return array
+     * @throws BitrixClientException
+     * @throws BitrixServerException
+     * @throws NotFoundException
+     * @throws UndefinedBitrixServerException
+     * @throws BitrixException
+     * @throws InputValidationException
+     * @throws TransportException
+     */
     function list(GenericListFilter $filter): array
     {
         $this->schema->assertValidFilter($this->getScopeSettings()['fields'], $filter, false);
@@ -57,7 +76,7 @@ abstract class UserDepartmentLegacyCrud extends CommonCrud
             $list['result'] = [];
             $list['total'] = 0;
         }
-        $this->schema->listResponseInbound($filter, $list);
+        $this->schema->assertListResponseInbound($filter, $list);
         $select = $filter->getSelect();
         if (!empty($select)) {
             $omits = array_diff(array_keys($this->getScopeSettings()['fields']), $select);
@@ -66,5 +85,10 @@ abstract class UserDepartmentLegacyCrud extends CommonCrud
             }
         }
         return $list;
+    }
+
+    function delete(int $id): bool
+    {
+        throw new BitrixClientException(__CLASS__." restricts deletion"); // TODO: it is actually supported, just determine control flow
     }
 }
