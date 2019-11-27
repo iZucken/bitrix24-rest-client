@@ -49,7 +49,7 @@ abstract class CommonCrud
      */
     public function add(array $fields): int
     {
-        $this->schema->assertValidFields($this->schema->getSchema()['crm']['lead']['fields'], $fields, false);
+        $this->schema->assertValidFields($this->getScopeSettings()['fields'], $fields, false);
         return $this->schema->client->call($this->getScopePath() . '.add', ['FIELDS' => $fields]);
     }
 
