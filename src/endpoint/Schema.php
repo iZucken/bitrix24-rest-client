@@ -15,7 +15,6 @@ use bitrix\storage\Storage;
 /**
  * Provides schema aggregation and assertion for endpoints
  *
- * TODO: fields size quality validation?
  * TODO: convert schematic fields to their corresponding types to ease end-user surprise load
  *
  * @package bitrix\endpoint
@@ -79,6 +78,12 @@ class Schema
                 ],
                 'currency'   => [
                     'list' => $this->client->call('crm.currency.list')['result'],
+                ],
+                'timeline'   => [
+                    'comment' => [
+                        'entityTypes' => ['lead', 'deal', 'contact', 'company', 'order'],
+                        'fields'      => $this->client->call('crm.timeline.comment.fields'),
+                    ],
                 ],
                 'status'     => [
                     'fields' => $this->client->call('crm.status.fields'),

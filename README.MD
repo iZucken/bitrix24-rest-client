@@ -14,14 +14,8 @@ These are generic wrappers, so you still need to know all of the methods and the
 
 Then there are bitrix\\endpoint\\* classes which wrap the clients to provide additional convenience.
 
-###### Supported endpoints
-
-* CRM Lead CRUD
-* CRM Status system CRUD
-* Common contacts search
-* Atavistic User CRUD
-* Atavistic Department CRUD
 #### Usage
+
 ```
 $bitrixClient = new \bitrix\rest\client\OauthAutoLogin(
     $config['bitrix']['uri'],
@@ -39,17 +33,15 @@ $this->bitrixClient->call('app.info');
 
 #### Known caveats
 
-* Documented methods crm.\*.details.\* are not accessible through web hooks or rest application with full rights.
-* In some cases API converts an array value in unexpected place to TRUE.
-* Some field types, like multiple-choice integer field, may be equal to `false` when nothing is chosen, but this library won't allow you to provide boolean value.
-Such values also cannot be unset by just providing an empty array, false, null, or any combination of them. 
-* Sometimes list responses do not conform to what is described below, this library aims to correct that but it is probable that not every case is covered
+* Documented methods crm.\*.details.\* are documented but not accessible.
+* In some cases API converts an array to TRUE if it expects a boolean.
+* Some field types, like multiple-choice integer field, in some cases may be equal to `false` when nothing is chosen, but this library won't allow you to provide boolean value.
+In these cases, such values also cannot be unset by just providing an empty array, false, null, or any combination of them.
 * Even if it is not specified, fields having regex rule are considered 'required' implicitly
-* USERFIELD REGEX RULES ARE NOT CHECKED FOR VALIDITY, INVALID REGEXES ALWAYS PASS
+* USERFIELD REGEX RULES ARE NOT CHECKED FOR VALIDITY, INVALID REGEXES ALWAYS PASS VALIDATION
 
 #### Hints
 
-* Frequently 'Id not defined' error is a signal of a malformed request.
 * To delete particular multi-field value object, pass id and an empty string or null as its value.
 
 #### Documentation bits
@@ -118,5 +110,3 @@ Generally consists of fields:
 `'total'` - total amount of possible filtered results
 
 `'next'` - optional field for paged lists, to be used in 'START' filter parameter
-
-
