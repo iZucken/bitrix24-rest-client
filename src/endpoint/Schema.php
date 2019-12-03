@@ -70,6 +70,15 @@ class Schema
                 'company'    => [
                     'fields' => $this->client->call('crm.company.fields'),
                 ],
+                'address'    => [
+                    'fields' => $this->client->call('crm.address.fields'),
+                ],
+                'requisite'    => [
+                    'fields' => $this->client->call('crm.requisite.fields'),
+                    'bankdetail'    => [
+                        'fields' => $this->client->call('crm.requisite.bankdetail.fields'),
+                    ],
+                ],
                 'enum'       => [
                     'fields' => $this->client->call('crm.enum.fields'),
                 ],
