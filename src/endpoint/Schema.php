@@ -73,9 +73,9 @@ class Schema
                 'address'    => [
                     'fields' => $this->client->call('crm.address.fields'),
                 ],
-                'requisite'    => [
-                    'fields' => $this->client->call('crm.requisite.fields'),
-                    'bankdetail'    => [
+                'requisite'  => [
+                    'fields'     => $this->client->call('crm.requisite.fields'),
+                    'bankdetail' => [
                         'fields' => $this->client->call('crm.requisite.bankdetail.fields'),
                     ],
                 ],
