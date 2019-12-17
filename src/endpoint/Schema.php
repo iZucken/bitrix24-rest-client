@@ -57,6 +57,15 @@ class Schema
             foreach ($statusList as $status) {
                 $statusEntityTypes[$status['ENTITY_ID']]['items'] [] = $status;
             }
+            $productFields = $this->client->call('crm.product.fields');
+            $productFieldsMap = [];
+            foreach ($productFields as $key => $productField) {
+                if (preg_match("~^PROPERTY_\d+$~", $key)) {
+                    $productFieldsMap[$productField['title']] = $key;
+                } else {
+                    $productFieldsMap[$key] = $key;
+                }
+            }
             $schema['crm'] = [
                 'lead'       => [
                     'fields' => $this->client->call('crm.lead.fields'),
@@ -84,6 +93,10 @@ class Schema
                 ],
                 'multifield' => [
                     'fields' => $this->client->call('crm.multifield.fields'),
+                ],
+                'product' => [
+                    'fields' => $productFields,
+                    'fieldsMap' => $productFieldsMap,
                 ],
                 'currency'   => [
                     'list' => $this->client->call('crm.currency.list')['result'],
