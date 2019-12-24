@@ -396,6 +396,7 @@ class Schema
                 return in_array($value, array_column($this->schema['crm']['currency']['list'], 'CURRENCY'));
             case 'unchecked':
             case 'product_property':
+            case 'product_file':
                 return true;
         }
         throw new BitrixClientException("Encountered unknown type '{$schema['type']}' in a schema");
