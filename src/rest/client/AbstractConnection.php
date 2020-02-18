@@ -35,10 +35,11 @@ abstract class AbstractConnection
         } catch (Throwable $exception) {
             throw new TransportException("This exception should not be ever happening: " . $exception->getMessage());
         }
+        $content = $response->getBody()->getContents();
         try {
-            $decoded = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+            $decoded = \GuzzleHttp\json_decode($content, true);
         } catch (Exception $exception) {
-            throw new TransportException("Failed to decode result: " . $exception->getMessage());
+            throw new TransportException("Json {$exception->getMessage()}: $content");
         }
         if (!empty($decoded['error'])||!empty($decoded['error_description'])) {
             throw new BitrixServerException("{$decoded['error']}: {$decoded['error_description']}");
