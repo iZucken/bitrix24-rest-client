@@ -39,7 +39,7 @@ abstract class AbstractConnection
         try {
             $decoded = \GuzzleHttp\json_decode($content, true);
         } catch (Exception $exception) {
-            throw new TransportException("Json {$exception->getMessage()}: $content");
+            throw new TransportException("Json {$exception->getMessage()}", $exception->getCode(), $exception, $content);
         }
         if (!empty($decoded['error'])||!empty($decoded['error_description'])) {
             throw new BitrixServerException("{$decoded['error']}: {$decoded['error_description']}");
